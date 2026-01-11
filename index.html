@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>App de Ensaio (WhatsApp)</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --card:#121a24;
+      --card2:#0f1620;
+      --text:#eaf2ff;
+      --muted:#9fb2cc;
+      --line:#223043;
+      --accent:#00e5ff;
+      --ok:#2cff88;
+      --warn:#ffd166;
+      --danger:#ff4d6d;
+      --shadow: 0 18px 40px rgba(0,0,0,.35);
+      --r:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(0,229,255,.18), transparent 60%),
+                  radial-gradient(1200px 700px at 90% 10%, rgba(44,255,136,.12), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
+    header{
+      position: sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,20,.7);
+      border-bottom:1px solid rgba(34,48,67,.7);
+    }
+    .wrap{max-width:1000px;margin:0 auto;padding:16px}
+    .top{
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    }
+    .title{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .title h1{margin:0;font-size:18px;letter-spacing:.3px}
+    .title small{color:var(--muted)}
+    .pill{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;
+    }
+    .badge{
+      background: linear-gradient(180deg, rgba(18,26,36,.9), rgba(15,22,32,.9));
+      border:1px solid rgba(34,48,67,.85);
+      border-radius:999px;
+      padding:8px 12px;
+      box-shadow: var(--shadow);
+      display:flex; align-items:center; gap:10px;
+      min-height:38px;
+    }
+    .badge b{font-size:14px}
+    .clock{
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .5px;
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    @media (max-width: 860px){
+      .grid{grid-template-columns:1fr}
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(18,26,36,.92), rgba(15,22,32,.92));
+      border:1px solid rgba(34,48,67,.9);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card header{
+      position:unset;
+      background: transparent;
+      border:0;
+      padding:14px 14px 0 14px;
+      backdrop-filter:none;
+    }
+    .card h2{
+      margin:0;
+      font-size:15px;
+      color:var(--text);
+      letter-spacing:.2px;
+    }
+    .card p.sub{
+      margin:6px 0 0 0;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .card .content{
+      padding:14px;
+    }
+
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    input, textarea, select, button{
+      font: inherit;
+      border-radius: 12px;
+      border:1px solid rgba(34,48,67,.95);
+      background: rgba(8,12,18,.7);
+      color: var(--text);
+      padding: 10px 12px;
+      outline:none;
+    }
+    input:focus, textarea:focus, select:focus{
+      border-color: rgba(0,229,255,.7);
+      box-shadow: 0 0 0 4px rgba(0,229,255,.12);
+    }
+    textarea{width:100%; min-height:110px; resize:vertical}
+    input[type="number"]{width:110px}
+    input[type="text"]{min-width:220px; flex:1}
+    select{min-width:180px}
+    .btn{
+      cursor:pointer;
+      border:1px solid rgba(34,48,67,.95);
+      background: linear-gradient(180deg, rgba(0,229,255,.18), rgba(0,229,255,.08));
+    }
+    .btn:hover{filter:brightness(1.06)}
+    .btn-ok{
+      background: linear-gradient(180deg, rgba(44,255,136,.22), rgba(44,255,136,.10));
+      border-color: rgba(44,255,136,.5);
+    }
+    .btn-danger{
+      background: linear-gradient(180deg, rgba(255,77,109,.22), rgba(255,77,109,.10));
+      border-color: rgba(255,77,109,.55);
+    }
+    .btn-ghost{
+      background: rgba(8,12,18,.45);
+    }
+
+    .timerBox{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      align-items:stretch;
+    }
+    @media (max-width:520px){
+      .timerBox{grid-template-columns:1fr}
+    }
+    .bigTime{
+      font-variant-numeric: tabular-nums;
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin: 8px 0 0 0;
+    }
+    .mini{
+      color: var(--muted);
+      font-size: 12px;
+      margin-top:6px;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .item{
+      background: rgba(8,12,18,.55);
+      border:1px solid rgba(34,48,67,.85);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .item .left{
+      display:flex; gap:10px; align-items:flex-start;
+      flex:1;
+    }
+    .check{
+      width:18px; height:18px; margin-top:2px;
+      accent-color: var(--ok);
+      cursor:pointer;
+    }
+    .meta{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .meta b{font-size:14px}
+    .meta small{color:var(--muted); font-size:12px}
+    .tag{
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid rgba(34,48,67,.9);
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .done b{color: var(--ok)}
+    .done .tag{border-color: rgba(44,255,136,.45); color: rgba(44,255,136,.9)}
+    .warn .tag{border-color: rgba(255,209,102,.55); color: rgba(255,209,102,.95)}
+    .danger .tag{border-color: rgba(255,77,109,.65); color: rgba(255,77,109,.95)}
+
+    .footerActions{
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .hint{
+      color: var(--muted);
+      font-size: 12px;
+      line-height:1.4;
+      margin-top: 10px;
+    }
+    .split{
+      display:grid; grid-template-columns: 1fr;
+      gap:12px;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      padding:2px 6px;
+      border-radius: 8px;
+      background: rgba(0,0,0,.35);
+      border:1px solid rgba(34,48,67,.8);
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap top">
+      <div class="title">
+        <h1>🎭 App de Ensaio — Compartilhar no WhatsApp</h1>
+        <small>Checklist + Timer + Anotações (salva automático)</small>
+      </div>
+
+      <div class="pill">
+        <div class="badge">
+          <span>🕒</span>
+          <div>
+            <div class="clock" id="clock">--:--:--</div>
+            <div class="mini" id="today">--</div>
+          </div>
+        </div>
+        <div class="badge">
+          <span>👤</span>
+          <div>
+            <div><b id="who">Edy</b></div>
+            <div class="mini">Modo ensaio</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="grid">
+      <!-- ESQUERDA -->
+      <section class="card">
+        <header>
+          <h2>⏱️ Timer de treino</h2>
+          <p class="sub">Use para aquecimento, coreografia, vocal e passagem geral.</p>
+        </header>
+        <div class="content timerBox">
+          <div class="card" style="border-radius:14px;">
+            <div class="content">
+              <div class="row">
+                <label style="display:flex;flex-direction:column;gap:6px;">
+                  <span class="mini">Bloco</span>
+                  <select id="blockType">
+                    <option value="Aquecimento">Aquecimento</option>
+                    <option value="Coreografia">Coreografia</option>
+                    <option value="Vocal">Vocal</option>
+                    <option value="Passagem geral">Passagem geral</option>
+                    <option value="Marcação de palco">Marcação de palco</option>
+                    <option value="Figurino / Props">Figurino / Props</option>
+                  </select>
+                </label>
+
+                <label style="display:flex;flex-direction:column;gap:6px;">
+                  <span class="mini">Min</span>
+                  <input id="mins" type="number" min="0" value="10" />
+                </label>
+
+                <label style="display:flex;flex-direction:column;gap:6px;">
+                  <span class="mini">Seg</span>
+                  <input id="secs" type="number" min="0" max="59" value="0" />
+                </label>
+              </div>
+
+              <div class="bigTime" id="timerDisplay">10:00</div>
+              <div class="mini" id="timerLabel">Pronto para iniciar</div>
+
+              <div class="row" style="margin-top:10px;">
+                <button class="btn btn-ok" id="startBtn">▶ Iniciar</button>
+                <button class="btn btn-ghost" id="pauseBtn" disabled>⏸ Pausar</button>
+                <button class="btn btn-danger" id="resetBtn">⟲ Zerar</button>
+              </div>
+
+              <div class="hint">Dica: faça 3 blocos (aquecimento → coreografia → passagem). Depois compartilhe o relatório no WhatsApp.</div>
+            </div>
+          </div>
+
+          <div class="card" style="border-radius:14px;">
+            <div class="content">
+              <h2 style="margin-top:0;">🧱 Blocos do ensaio</h2>
+              <p class="sub">Adicione blocos e marque quando concluir (com hora registrada).</p>
+
+              <div class="row" style="margin-top:10px;">
+                <input id="newBlock" type="text" placeholder="Ex: Smooth Criminal - 45° lean (10 min)" />
+                <button class="btn" id="addBlockBtn">＋ Adicionar</button>
+              </div>
+
+              <div class="list" id="blocksList" style="margin-top:12px;"></div>
+
+              <div class="footerActions">
+                <button class="btn btn-ghost" id="clearBlocksBtn">Limpar blocos</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DIREITA -->
+      <aside class="split">
+        <section class="card">
+          <header>
+            <h2>✅ Checklist rápido (pré-ensaio)</h2>
+            <p class="sub">Tudo que precisa estar “OK” antes de começar.</p>
+          </header>
+          <div class="content">
+            <div class="list" id="checklist"></div>
+
+            <div class="footerActions">
+              <button class="btn btn-ghost" id="resetChecksBtn">Reset checklist</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <header>
+            <h2>📝 Anotações do dia</h2>
+            <p class="sub">Ideias, ajustes, recados pro elenco/técnico.</p>
+          </header>
+          <div class="content">
+            <textarea id="notes" placeholder="Ex: Ajustar luz do Billie Jean / revisar entrada do mic stand / checar luva..."></textarea>
+
+            <div class="footerActions">
+              <button class="btn btn-ok" id="shareBtn">📲 Compartilhar no WhatsApp</button>
+              <button class="btn btn-ghost" id="copyBtn">📋 Copiar relatório</button>
+              <button class="btn btn-danger" id="wipeBtn">🧨 Zerar tudo</button>
+            </div>
+
+            <div class="hint">
+              Se estiver no PC, o botão do WhatsApp abre o <b>WhatsApp Web</b>.
+              No celular, abre o app direto.
+              <br/>Atalho: <span class="kbd">Ctrl</span> + <span class="kbd">S</span> salva o arquivo HTML, mas o app já salva tudo no navegador.
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    // ===== util =====
+    const pad = (n) => String(n).padStart(2, "0");
+    const nowStr = () => {
+      const d = new Date();
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    };
+    const dateStr = () => {
+      const d = new Date();
+      const meses = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+      return `${pad(d.getDate())} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+    };
+
+    // ===== clock =====
+    function tickClock(){
+      document.getElementById("clock").textContent = nowStr();
+      document.getElementById("today").textContent = dateStr();
+    }
+    setInterval(tickClock, 500);
+    tickClock();
+
+    // ===== storage keys =====
+    const KEY = "ensaio_app_v1";
+
+    // ===== state =====
+    const defaultChecklist = [
+      { text: "Água + toalha", level:"ok" },
+      { text: "Som / retorno testado", level:"warn" },
+      { text: "Tênis / sapato limpo", level:"ok" },
+      { text: "Figurino separado", level:"warn" },
+      { text: "Props (luva / chapéu / mic stand)", level:"warn" },
+      { text: "Aquecimento 5 min", level:"ok" },
+      { text: "Espaço livre p/ marcação", level:"ok" },
+    ];
+
+    let state = {
+      who: "Edy",
+      blocks: [],
+      checklist: defaultChecklist.map(i => ({...i, done:false, time:""})),
+      notes: "",
+      timer: { totalSec: 600, remainingSec: 600, running:false, label:"Aquecimento" }
+    };
+
+    function save(){
+      localStorage.setItem(KEY, JSON.stringify(state));
+    }
+    function load(){
+      const raw = localStorage.getItem(KEY);
+      if(!raw) return;
+      try{
+        const parsed = JSON.parse(raw);
+        state = {
+          ...state,
+          ...parsed,
+          // fallback if checklist shape changes:
+          checklist: (parsed.checklist && parsed.checklist.length)
+            ? parsed.checklist
+            : defaultChecklist.map(i => ({...i, done:false, time:""}))
+        };
+      }catch(e){}
+    }
+
+    // ===== render checklist =====
+    const checklistEl = document.getElementById("checklist");
+
+    function renderChecklist(){
+      checklistEl.innerHTML = "";
+      state.checklist.forEach((item, idx) => {
+        const row = document.createElement("div");
+        row.className = `item ${item.done ? "done" : ""} ${item.level === "warn" ? "warn" : item.level === "danger" ? "danger" : ""}`;
+        row.innerHTML = `
+          <div class="left">
+            <input class="check" type="checkbox" ${item.done ? "checked" : ""} />
+            <div class="meta">
+              <b>${item.text}</b>
+              <small>${item.done ? ("Concluído às " + item.time) : "Pendente"}</small>
+            </div>
+          </div>
+          <div class="tag">${item.done ? "OK" : (item.level === "warn" ? "ATENÇÃO" : item.level === "danger" ? "CRÍTICO" : "Padrão")}</div>
+        `;
+        row.querySelector("input").addEventListener("change", (e) => {
+          const done = e.target.checked;
+          state.checklist[idx].done = done;
+          state.checklist[idx].time = done ? nowStr() : "";
+          save();
+          renderChecklist();
+        });
+        checklistEl.appendChild(row);
+      });
+    }
+
+    document.getElementById("resetChecksBtn").addEventListener("click", () => {
+      state.checklist = state.checklist.map(i => ({...i, done:false, time:""}));
+      save();
+      renderChecklist();
+    });
+
+    // ===== blocks =====
+    const blocksListEl = document.getElementById("blocksList");
+
+    function renderBlocks(){
+      blocksListEl.innerHTML = "";
+      if(state.blocks.length === 0){
+        const empty = document.createElement("div");
+        empty.className = "hint";
+        empty.textContent = "Nenhum bloco ainda. Adicione acima (ex: 'Bad - marcação + saída').";
+        blocksListEl.appendChild(empty);
+        return;
+      }
+
+      state.blocks.forEach((b, idx) => {
+        const row = document.createElement("div");
+        row.className = `item ${b.done ? "done" : ""}`;
+        row.innerHTML = `
+          <div class="left">
+            <input class="check" type="checkbox" ${b.done ? "checked" : ""} />
+            <div class="meta">
+              <b>${b.text}</b>
+              <small>${b.done ? ("Concluído às " + b.time) : "Pendente"}</small>
+            </div>
+          </div>
+          <button class="btn btn-ghost" title="Remover">🗑️</button>
+        `;
+        row.querySelector("input").addEventListener("change", (e) => {
+          state.blocks[idx].done = e.target.checked;
+          state.blocks[idx].time = e.target.checked ? nowStr() : "";
+          save();
+          renderBlocks();
+        });
+        row.querySelector("button").addEventListener("click", () => {
+          state.blocks.splice(idx, 1);
+          save();
+          renderBlocks();
+        });
+        blocksListEl.appendChild(row);
+      });
+    }
+
+    document.getElementById("addBlockBtn").addEventListener("click", () => {
+      const input = document.getElementById("newBlock");
+      const text = (input.value || "").trim();
+      if(!text) return;
+      state.blocks.unshift({ text, done:false, time:"" });
+      input.value = "";
+      save();
+      renderBlocks();
+    });
+
+    document.getElementById("clearBlocksBtn").addEventListener("click", () => {
+      state.blocks = [];
+      save();
+      renderBlocks();
+    });
+
+    // ===== notes =====
+    const notesEl = document.getElementById("notes");
+    notesEl.addEventListener("input", () => {
+      state.notes = notesEl.value;
+      save();
+    });
+
+    // ===== timer =====
+    let timerInterval = null;
+
+    function setTimerFromInputs(){
+      const m = parseInt(document.getElementById("mins").value || "0", 10);
+      const s = parseInt(document.getElementById("secs").value || "0", 10);
+      const total = Math.max(0, (m*60) + Math.min(59, Math.max(0, s)));
+      state.timer.totalSec = total;
+      state.timer.remainingSec = total;
+      save();
+      renderTimer();
+    }
+
+    function formatMMSS(sec){
+      sec = Math.max(0, sec|0);
+      const m = Math.floor(sec/60);
+      const s = sec % 60;
+      return `${pad(m)}:${pad(s)}`;
+    }
+
+    function renderTimer(){
+      document.getElementById("timerDisplay").textContent = formatMMSS(state.timer.remainingSec);
+      document.getElementById("timerLabel").textContent =
+        state.timer.running
+          ? `Rodando: ${state.timer.label}`
+          : `Pronto: ${state.timer.label}`;
+      document.getElementById("pauseBtn").disabled = !state.timer.running;
+      document.getElementById("startBtn").disabled = state.timer.running || state.timer.remainingSec === 0;
+      document.getElementById("blockType").value = state.timer.label;
+
+      // sync inputs if not running
+      if(!state.timer.running){
+        const m = Math.floor(state.timer.remainingSec/60);
+        const s = state.timer.remainingSec%60;
+        document.getElementById("mins").value = m;
+        document.getElementById("secs").value = s;
+      }
+    }
+
+    function startTimer(){
+      if(state.timer.running) return;
+      if(state.timer.remainingSec <= 0) return;
+
+      state.timer.running = true;
+      save();
+      renderTimer();
+
+      timerInterval = setInterval(() => {
+        state.timer.remainingSec -= 1;
+        if(state.timer.remainingSec <= 0){
+          state.timer.remainingSec = 0;
+          stopTimer(true);
+          beep();
+        }
+        save();
+        renderTimer();
+      }, 1000);
+    }
+
+    function stopTimer(finished=false){
+      if(timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      state.timer.running = false;
+
+      if(finished){
+        // log as a completed block
+        const label = state.timer.label;
+        const total = state.timer.totalSec;
+        const mins = Math.round(total/60);
+        const text = `${label} — ${mins} min (finalizado)`;
+        state.blocks.unshift({ text, done:true, time: nowStr() });
+      }
+
+      save();
+      renderBlocks();
+      renderTimer();
+    }
+
+    function pauseTimer(){
+      if(!state.timer.running) return;
+      stopTimer(false);
+    }
+
+    function resetTimer(){
+      stopTimer(false);
+      setTimerFromInputs();
+    }
+
+    function beep(){
+      // beep curto (WebAudio)
+      try{
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = "sine";
+        o.frequency.value = 880;
+        g.gain.setValueAtTime(0.001, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        o.start();
+        o.stop(ctx.currentTime + 0.28);
+      }catch(e){}
+      // vibra no celular (se permitido)
+      if(navigator.vibrate) navigator.vibrate([120, 60, 120]);
+    }
+
+    document.getElementById("startBtn").addEventListener("click", startTimer);
+    document.getElementById("pauseBtn").addEventListener("click", pauseTimer);
+    document.getElementById("resetBtn").addEventListener("click", resetTimer);
+
+    document.getElementById("blockType").addEventListener("change", (e) => {
+      state.timer.label = e.target.value;
+      save();
+      renderTimer();
+    });
+    document.getElementById("mins").addEventListener("change", () => {
+      if(state.timer.running) return;
+      setTimerFromInputs();
+    });
+    document.getElementById("secs").addEventListener("change", () => {
+      if(state.timer.running) return;
+      setTimerFromInputs();
+    });
+
+    // ===== report =====
+    function buildReport(){
+      const doneChecks = state.checklist.filter(c => c.done).length;
+      const totalChecks = state.checklist.length;
+
+      const doneBlocks = state.blocks.filter(b => b.done).length;
+      const totalBlocks = state.blocks.length;
+
+      const lines = [];
+      lines.push(`🎭 RELATÓRIO DE ENSAIO — ${state.who}`);
+      lines.push(`📅 ${dateStr()} • 🕒 ${nowStr()}`);
+      lines.push(``);
+      lines.push(`✅ Checklist: ${doneChecks}/${totalChecks}`);
+      state.checklist.forEach(c => {
+        lines.push(`${c.done ? "🟢" : "⚪"} ${c.text}${c.done ? " ("+c.time+")" : ""}`);
+      });
+
+      lines.push(``);
+      lines.push(`🧱 Blocos: ${doneBlocks}/${totalBlocks}`);
+      if(totalBlocks === 0){
+        lines.push(`(sem blocos)`);
+      }else{
+        state.blocks.forEach(b => {
+          lines.push(`${b.done ? "🟢" : "⚪"} ${b.text}${b.done ? " ("+b.time+")" : ""}`);
+        });
+      }
+
+      lines.push(``);
+      lines.push(`📝 Notas:`);
+      lines.push(state.notes ? state.notes.trim() : "(sem notas)");
+      lines.push(``);
+      lines.push(`📲 Enviado pelo App de Ensaio`);
+      return lines.join("\n");
+    }
+
+    function shareWhatsApp(){
+      const msg = buildReport();
+      const url = "https://wa.me/?text=" + encodeURIComponent(msg);
+      window.open(url, "_blank");
+    }
+
+    async function copyReport(){
+      const msg = buildReport();
+      try{
+        await navigator.clipboard.writeText(msg);
+        alert("Relatório copiado ✅");
+      }catch(e){
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = msg;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        alert("Relatório copiado ✅");
+      }
+    }
+
+    document.getElementById("shareBtn").addEventListener("click", shareWhatsApp);
+    document.getElementById("copyBtn").addEventListener("click", copyReport);
+
+    document.getElementById("wipeBtn").addEventListener("click", () => {
+      if(!confirm("Zerar tudo? (Checklist, blocos, notas e timer)")) return;
+      localStorage.removeItem(KEY);
+      load(); // loads nothing
+      state = {
+        who: "Edy",
+        blocks: [],
+        checklist: defaultChecklist.map(i => ({...i, done:false, time:""})),
+        notes: "",
+        timer: { totalSec: 600, remainingSec: 600, running:false, label:"Aquecimento" }
+      };
+      save();
+      hydrateUI();
+    });
+
+    // ===== hydrate UI =====
+    function hydrateUI(){
+      document.getElementById("who").textContent = state.who || "Edy";
+      notesEl.value = state.notes || "";
+      renderChecklist();
+      renderBlocks();
+      renderTimer();
+    }
+
+    // init
+    load();
+    // ensure label is valid
+    if(!state.timer || typeof state.timer.remainingSec !== "number"){
+      state.timer = { totalSec: 600, remainingSec: 600, running:false, label:"Aquecimento" };
+    }
+    if(!state.timer.label) state.timer.label = "Aquecimento";
+    if(!Array.isArray(state.blocks)) state.blocks = [];
+    if(!Array.isArray(state.checklist) || !state.checklist.length){
+      state.checklist = defaultChecklist.map(i => ({...i, done:false, time:""}));
+    }
+    save();
+    hydrateUI();
+  </script>
+</body>
+</html>
