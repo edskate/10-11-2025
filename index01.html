@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checklist de Figurino – Pocket Show</title>
+
+<style>
+:root{
+  --bg:#0b0f14;
+  --card:#121a24;
+  --text:#eaf2ff;
+  --muted:#9fb2cc;
+  --accent:#00e5ff;
+  --ok:#2cff88;
+  --warn:#ffd166;
+  --danger:#ff4d6d;
+  --shadow:0 18px 40px rgba(0,0,0,.35);
+  --r:18px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,Segoe UI,Arial;
+  background:var(--bg);
+  color:var(--text);
+}
+header{
+  position:sticky;top:0;z-index:10;
+  background:rgba(11,15,20,.9);
+  border-bottom:1px solid #223043;
+}
+.wrap{max-width:900px;margin:auto;padding:16px}
+h1{margin:0;font-size:18px}
+small{color:var(--muted)}
+
+.card{
+  background:var(--card);
+  border-radius:var(--r);
+  padding:14px;
+  box-shadow:var(--shadow);
+  margin-top:14px;
+}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+select,input,button,textarea{
+  background:#0f1620;
+  color:var(--text);
+  border:1px solid #223043;
+  border-radius:12px;
+  padding:10px;
+  font:inherit;
+}
+button{cursor:pointer}
+button.ok{background:#163b2a;border-color:#2cff88}
+button.warn{background:#3a2f16;border-color:#ffd166}
+button.danger{background:#3a1620;border-color:#ff4d6d}
+
+.list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.item{
+  background:#0f1620;
+  border-radius:14px;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+}
+.item.done b{color:var(--ok)}
+.left{display:flex;gap:10px}
+.check{accent-color:var(--ok);margin-top:3px}
+.tag{
+  font-size:12px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid #223043;
+}
+.warn{color:var(--warn)}
+.danger{color:var(--danger)}
+.ok{color:var(--ok)}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>👥 Checklist de Figurino – Pocket Show</h1>
+    <small>Controle profissional por dançarino • WhatsApp • Salvamento automático</small>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="card">
+  <b>👤 Selecionar dançarino</b>
+  <div class="row" style="margin-top:8px">
+    <select id="dancerSelect"></select>
+    <input id="newDancer" placeholder="Nome do dançarino">
+    <button onclick="addDancer()">＋ Adicionar</button>
+  </div>
+</div>
+
+<div class="card">
+  <b>👕 Figurino & Acessórios</b>
+  <div class="list" id="figurinoList"></div>
+</div>
+
+<div class="card">
+  <b>📲 Relatórios</b>
+  <div class="row" style="margin-top:8px">
+    <button class="ok" onclick="sendIndividual()">WhatsApp Individual</button>
+    <button onclick="sendGeral()">WhatsApp Geral</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const defaultFigurino = [
+  {text:"Jaqueta do show",level:"warn"},
+  {text:"Calça do figurino",level:"warn"},
+  {text:"Camisa / camiseta",level:"ok"},
+  {text:"Luva (mão correta)",level:"warn"},
+  {text:"Meias",level:"ok"},
+  {text:"Sapatos",level:"warn"},
+  {text:"Chapéu",level:"ok"},
+  {text:"Cinto / suspensório",level:"ok"},
+  {text:"Mic stand",level:"warn"},
+  {text:"Peça reserva",level:"danger"},
+  {text:"Kit emergência",level:"danger"}
+];
+
+const KEY="FIGURINO_POCKET_V1";
+
+let state={
+  dancers:[
+    {name:"Dançarino 01",figurino:defaultFigurino.map(i=>({...i,done:false,time:""}))}
+  ],
+  selected:0
+};
+
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function load(){
+  const r=localStorage.getItem(KEY);
+  if(r) state=JSON.parse(r);
+}
+
+function now(){
+  const d=new Date();
+  return d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+}
+
+function render(){
+  const sel=document.getElementById("dancerSelect");
+  sel.innerHTML="";
+  state.dancers.forEach((d,i)=>{
+    const o=document.createElement("option");
+    o.value=i;o.textContent=d.name;
+    sel.appendChild(o);
+  });
+  sel.value=state.selected;
+
+  const list=document.getElementById("figurinoList");
+  list.innerHTML="";
+  const d=state.dancers[state.selected];
+
+  d.figurino.forEach(item=>{
+    const row=document.createElement("div");
+    row.className="item "+(item.done?"done":"");
+    row.innerHTML=`
+      <div class="left">
+        <input class="check" type="checkbox" ${item.done?"checked":""}>
+        <div>
+          <b>${item.text}</b><br>
+          <small>${item.done?"OK às "+item.time:"Pendente"}</small>
+        </div>
+      </div>
+      <div class="tag ${item.level}">${item.done?"OK":item.level.toUpperCase()}</div>
+    `;
+    row.querySelector("input").onchange=e=>{
+      item.done=e.target.checked;
+      item.time=item.done?now():"";
+      save();render();
+    };
+    list.appendChild(row);
+  });
+}
+
+function addDancer(){
+  const n=document.getElementById("newDancer").value.trim();
+  if(!n) return;
+  state.dancers.push({
+    name:n,
+    figurino:defaultFigurino.map(i=>({...i,done:false,time:""}))
+  });
+  state.selected=state.dancers.length-1;
+  document.getElementById("newDancer").value="";
+  save();render();
+}
+
+document.getElementById("dancerSelect").onchange=e=>{
+  state.selected=+e.target.value;
+  save();render();
+};
+
+function sendIndividual(){
+  const d=state.dancers[state.selected];
+  let msg=`👤 FIGURINO — ${d.name}\n🕒 ${new Date().toLocaleString()}\n\n`;
+  d.figurino.forEach(i=>{
+    msg+=`${i.done?"🟢":"⚪"} ${i.text}${i.done?" ("+i.time+")":""}\n`;
+  });
+  window.open("https://wa.me/?text="+encodeURIComponent(msg));
+}
+
+function sendGeral(){
+  let msg="👥 FIGURINO GERAL — POCKET SHOW\n\n";
+  state.dancers.forEach(d=>{
+    msg+=`👤 ${d.name}\n`;
+    d.figurino.forEach(i=>{
+      msg+=`${i.done?"🟢":"⚪"} ${i.text}\n`;
+    });
+    msg+="\n";
+  });
+  window.open("https://wa.me/?text="+encodeURIComponent(msg));
+}
+
+load();
+render();
+save();
+</script>
+
+</body>
+</html>
